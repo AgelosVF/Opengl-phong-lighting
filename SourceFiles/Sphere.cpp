@@ -1,0 +1,106 @@
+#include "../HeaderFiles/Sphere.h"
+#include "../HeaderFiles/Shader.h"
+#include <glm/ext/vector_float3.hpp>
+
+const float PI = 3.14159265359f;
+const float TAU = 6.28318530717f;
+
+
+Sphere::Sphere(unsigned int xSegments, unsigned int ySegments)
+{
+
+    Vertex vertex;
+    glm::vec3 vector;
+
+    for (unsigned int y = 0; y <= ySegments; ++y)
+    {
+        for (unsigned int x = 0; x <= xSegments; ++x)
+        {
+
+            Vertex vertex;
+            glm::vec3 vector;
+
+            float xSegment = (float)x / (float)xSegments;
+            float ySegment = (float)y / (float)ySegments;
+            float xPos = std::cos(xSegment * TAU) * std::sin(ySegment * PI); // TAU is 2PI
+            float yPos = std::cos(ySegment * PI);
+            float zPos = std::sin(xSegment * TAU) * std::sin(ySegment * PI);
+
+
+            vector.x = xPos;
+            vector.y = yPos;
+            vector.z = zPos;
+
+            vertex.Position = vector;
+            vertex.TexCoords = glm::vec2(xSegment, ySegment);
+            vertex.Normal = vector;
+
+            vertices.push_back(vertex);
+
+        }
+    }
+
+    bool oddRow = false;
+    for (int y = 0; y < ySegments; ++y)
+    {
+        for (int x = 0; x < xSegments; ++x)
+        {
+            Indices.push_back((y + 1) * (xSegments + 1) + x);
+            Indices.push_back(y * (xSegments + 1) + x);
+            Indices.push_back(y * (xSegments + 1) + x + 1);
+
+            Indices.push_back((y + 1) * (xSegments + 1) + x);
+            Indices.push_back(y * (xSegments + 1) + x + 1);
+            Indices.push_back((y + 1) * (xSegments + 1) + x + 1);
+        }
+    }
+
+
+    // You must implement this function!
+    setupSphere();
+}
+
+
+void Sphere::setupSphere() {
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    //bind the vao first so it saves the buffers
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER,VBO);
+    
+    //put the whole struct inside
+    glBufferData(GL_ARRAY_BUFFER,(vertices.size()*sizeof(Vertex)),&vertices[0],GL_STATIC_DRAW);
+
+
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,(Indices.size()*sizeof(unsigned int)),Indices.data(),GL_STATIC_DRAW);
+
+    //set the vertex attribute pointers
+    //Position->0
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    //Normal->1
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+    //TexCoords->2
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+
+
+    //unbind the vao
+    glBindVertexArray(0);
+}
+
+void Sphere::Draw() {
+
+   
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(Indices.size()), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+
+}
