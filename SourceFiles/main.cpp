@@ -95,7 +95,7 @@ int main()
 
     // load models
     // -----------
-    Sphere sphere(10,10);
+    Sphere sphere(20,20);
     Model Woman("./head_obj/woman1.obj");
 
     
@@ -116,7 +116,7 @@ int main()
 
         // render
         // ------
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Sphere
@@ -125,7 +125,8 @@ int main()
         rotationAngle += lightSpeed * deltaTime;
         //smoother than glfwGetTime
         lightPos.x = radius * cos(rotationAngle);
-        lightPos.y=  0.9 * sin(rotationAngle)  ;
+        // Y position now moves up and down more slowly and affects the radius
+        lightPos.y = 0.9f * sin(rotationAngle * 0.3f);
         lightPos.z = radius * sin(rotationAngle);
 
         // view/projection transformations
